@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  app:
+    image: openjdk:21-jdk-slim
+    container_name: verve-app
+    deploy:
+      resources:
+        limits:
+          cpus: '2'       # Limit to 2 CPU cores
+          memory: 4096M      # Limit to 4 GB of memory
+    ports:
+      - "8101:8101"
+    volumes:
+#      - ./verve-app.jar:/verve-app.jar
+      - ./build/libs/verve-app.jar:/verve-app.jar
+    working_dir: /
+    command: ["java", "-jar", "verve-app.jar"]
+    depends_on:
+      - redis
+    environment:
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+    networks:
+      - verve-network
+
+  redis:
+    image: redis:latest
+    container_name: verve-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - verve-network
+
+networks:
+  verve-network:
+    driver: bridge
