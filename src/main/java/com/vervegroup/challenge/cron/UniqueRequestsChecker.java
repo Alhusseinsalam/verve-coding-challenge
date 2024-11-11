@@ -16,6 +16,7 @@ public class UniqueRequestsChecker {
 
     @Scheduled(cron = "59 * * * * ?")
     public void checkUniqueRequests() {
+        verveService.streamUniqueRequests();
         logger.info("Number of unique requests: {}", verveService.getUniqueRequestCount());
     }
 

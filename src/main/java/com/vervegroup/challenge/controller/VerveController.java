@@ -21,6 +21,9 @@ public class VerveController {
                          @RequestParam(value = "endpoint", required = false) String endpoint) {
 
         verveService.handleRequest(id);
+        if (endpoint != null && !endpoint.isEmpty()) {
+            verveService.sendUniqueRequestCount(endpoint);
+        }
         return new ResponseEntity<>("ok", HttpStatus.OK);
     }
 }

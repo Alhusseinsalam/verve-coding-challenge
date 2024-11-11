@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @ControllerAdvice
-public class MissingParameterExceptionHandler {
-    @ExceptionHandler({MissingServletRequestParameterException.class, MethodArgumentTypeMismatchException.class})
+public class GeneralExceptionHandler {
+    @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleMissingParams(Exception ex) {
         return new ResponseEntity<>("failed", HttpStatus.BAD_REQUEST);
     }
