@@ -4,23 +4,19 @@ services:
   app:
     image: openjdk:21-jdk-slim
     container_name: verve-app
-    deploy:
-      resources:
-        limits:
-          cpus: '2'       # Limit to 2 CPU cores
-          memory: 4096M      # Limit to 4 GB of memory
     ports:
       - "8101:8101"
     volumes:
-#      - ./verve-app.jar:/verve-app.jar
-      - ./build/libs/verve-app.jar:/verve-app.jar
+      - ./verve-app.jar:/verve-app.jar
     working_dir: /
     command: ["java", "-jar", "verve-app.jar"]
     depends_on:
       - redis
+      - kafka
     environment:
       - SPRING_REDIS_HOST=redis
       - SPRING_REDIS_PORT=6379
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
     networks:
       - verve-network
 
@@ -29,9 +25,44 @@ services:
     container_name: verve-redis
     ports:
       - "6379:6379"
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    networks:
+      - verve-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - verve-network
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper
     networks:
       - verve-network
 
 networks:
   verve-network:
+    name: verve-network
     driver: bridge
