@@ -14,6 +14,7 @@ $ docker-compose up
 ```
 
 # Accessing the application
+- the jar file is in the root directory of the project 'verve-app.jar'
 - The application can be accessed at http://localhost:3000
 - the following scripts can be used to test the application:
   - `send_test_requests.ps1`
